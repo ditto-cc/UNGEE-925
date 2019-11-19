@@ -732,23 +732,321 @@ void MST_Prim(struct MGraph *G, int v0, int &sum) {
 ## 2、 排序算法
 1. 插入类
    - 直接插入排序
+   
+     > 最少比较次数：**n-1**
+     >
+     > 最多比较次数：**(n + 2) * (n - 1) / 2**（加上哨兵）
+     >
+     > 时间复杂度：**O(n^2)**
+     >
+     > 空间复杂度：**O(1)**
+     >
+     > **稳定**
+   
+   ```c
+   //不带哨兵
+   void InsertionSort(int data[], int n) {
+       for (int i = 1; i < n; i++) {
+           int e = data[i];
+           int j = i;
+           for (; j > 0 && data[j - 1] > e; j--) {
+               data[j] = data[j - 1];
+           }
+           data[j] = e;
+       }
+   }
+   
+   
+   //严薇敏书上的
+   void InertSort(struct SqList &L) {
+       for (i = 2; i <= L.length; i++) {
+           if (LT(L.r[i].key, L.r[i - 1].key)) {
+               L.r[0] = L.r[i];
+               L.r[i] = L.r[i - 1];
+               for (j = i - 2; LT(L.r[0], L.r[j]); j--) 
+                   L.r[j + 1] = L.r[j];
+               L.r[j + 1] = L.r[0];
+           }
+       }
+   }
+   ```
+   
    - 折半插入排序
+   
+     > 相比直接插入排序，减少了比较次数
+     >
+     > 时间复杂度：**O(n^2)**
+     >
+     > 空间复杂度：**O(1)**
+   ```c
+   //严书上
+   void BInsertSort(struct SqList &L) {
+       for (i = 2; i < = L.length; i++) {
+           L.r[0] = L.r[i];
+           low = 1; high = i - 1;
+           while (low < high) {
+               m = (low + high) / 2;
+               if (LT(L.r[0].key, L.r[m].key))
+                   high = m - 1;
+               else
+                   low = m + 1;
+           }
+           for (j = i - 1;j >= high + 1;j-)
+               L.r[j + 1] = L.r[j];
+           L.r[high + 1] = L.r[0];
+       }
+   }
+   ```
    - 希尔排序
+   
+     > 时间复杂度：**O(n^(3/2))**
+     >
+     > 空间复杂度：**O(1)**
+     >
+     > **不稳定**
+   ```c
+   //严书上,L.r[0]是暂存单元，不是哨兵
+   void ShellInsert(struct SqList &L, int dk) {
+       for (i = dk + 1; i < L.length; i++) {
+           if (LT(L.r[i].key, L.r[i - dk])) {
+               L.r[0] = L.r[i];
+               for (j = i - dk; j > 0; j -= dk)
+                   L.r[j + dk] = L.r[j];
+               L.r[j + dk] = L.r[0];
+           }
+       }
+   }
+   
+   void ShellSort(struct SqList &L, int dlta[], int t) {
+       for (i = 0; i < t; i++) {
+           ShellInsert(L, dlta[i]);
+       }
+   }
+   ```
+   
 2. 交换类
    - 冒泡排序
+     
+     > 时间复杂度**O(n^2)**
+     >
+     > 空间复杂度：**O(1)**
+     >
+     > **稳定**
+   
+   ```c
+   void swap(int data[], int i, int j) {
+       int temp = data[i];
+       data[i] = data[j];
+       data[j] = temp;
+   }
+   
+   void BubbleSort(int data[], int n) {
+       bool change = false;
+       for (int i = n - 1; i >= 0; i --) {
+           change = false;
+           for (int j = 0; j < i; j++) {
+               if (data[j] > data[j + 1]) {
+                   swap(data, j, j + 1);
+                   change = true;
+               }
+           }
+           if (!change)
+               return;
+       }
+   }
+   ```
+   
    - 快速排序
+   
+     > 时间复杂度：**O(nlogn)**
+     >
+     > 空间复杂度：**O(nlogn)**
+     >
+     > **稳定**
+   
+   ```c
+   int Partition(int data[], int left, int right) {
+       if (left >= right)
+           return;
+       int piv = data[left];
+       int i = left, j = right;
+       while (i < j) {
+           while (i < j && data[j] >= piv) j--;
+           data[i] = data[j];
+           while (i < j && data[i] <= piv) i++;
+           data[j] = data[i];
+       }
+       data[i] = piv;
+   	
+       return i;
+   }
+   
+   void QSort(int data[], int low, int high) {
+       if (low <= high)
+           return;
+       int piv = Partition(data, low, high);
+       QSort(data, 0, piv - 1);
+       QSort(data, piv + 1, high);
+   }
+   
+   void QuickSort(int data[], int n) {
+       QSort(data, 0, -1);
+   }
+   ```
+   
 3. 选择类
    - 简单选择排序
-   - 堆排序
-4. 二路归并排序
+   
+     > 时间复杂度：**O(n^2)**
+     >
+     > 空间复杂度：**O(1)**
+     >
+     > **不稳定**
+   
+   ```c
+   void swap(int data[], int i, int j) {
+       int temp = data[i];
+       data[i] = data[j];
+       data[j] = temp;
+   }
+   
+   void SelectSort(int data[], int n) {
+       for (int i = 0; i < n; i ++) {
+           int min = i;
+           for (int j = i; j < n; j++) {
+               if (data[j] < data[min]) {
+                   min = j;
+               }
+           }
+           swap(data, i, min);
+       }
+   }
+   ```
+   
+   - 堆排序（去年刚考过算法题）
+   
+     > 时间复杂度：**O(nlogn)**
+     >
+     > 空间复杂度：**O(1)**
+     >
+     > **不稳定**
+   
+     ```c
+     void swap(int data[], int a, int b) {
+         int temp = data[a];
+         data[a] = data[b];
+         data[b] = temp;
+     }
+     
+     void siftDown(int data[], int i, int end) {
+         while (2 * i <= end) {
+             int child = 2 * i;
+             if (child + 1 <= end && data[child + 1] > data[child])
+                 child ++;
+     
+             if (data[child] < data[i]) {
+             	break;
+             }
+             swap(data, i, child);
+             i = child;
+         }
+     }
+     
+     void HeapSort(int data[], int n) {
+         int i = n / 2;
+     
+         for ( ;i > 0; i--) {
+             siftDown(data, i, n);
+         }
+     
+         for (i = n; i > 1; i--) {
+             swap(data, 1, i);
+             siftDown(data, 1, n - i);
+         }
+     }
+     ```
+   
+     
+   
+4. 二路归并排序（几乎没出过算法题）
+
+   > 时间复杂度：**O(nlogn)**
+   >
+   > 空间复杂度：**O(n)**
+
+   ```c
+   void Merge(int data[], int left, int mid, int right) {
+   	//辅助空间
+       int temp[right - left + 1];
+       int n = right - left + 1;
+   
+       int i = left, j = mid + 1;
+       
+       //归并操作，将两个有序序列归并到辅助空间中
+       int k = 0;
+       while (k < n) {
+           if (i > mid) {
+               temp[k] = data[j++];
+           } else if (j > right) {
+               temp[k] = data[i++];
+           } else if (data[i] < data[j]) {
+               temp[k] = data[i++];
+           } else {
+               temp[k] = data[j++];
+           }
+           k++;
+       }
+   
+       for (i = left; i <= right; i++) {
+           data[i] = temp[i - left];
+       }
+   }
+   
+   void MergeSort(int data[], int left, int right) {
+       if (left >= right)
+           return;
+   
+       int mid = left + (right - left) / 2;
+       MergeSort(data, left, mid);
+       MergeSort(data, mid + 1, right);
+       Merge(data, left, mid, right);
+   }
+   
+   void MergeSort(int data[], int n) {
+       MergeSort(data, 0, n - 1);
+   }
+   ```
+
+   
+
 5. 基数排序
+
+   > 不需要比较关键字
+   >
+   > 时间复杂度：**O(d * (n + rd))**
+   >
+   > 空间复杂度：**O(r* d)**
 ## 4、外部排序（期末考试有，真题没见过，需要看一看）
-## 5、时间复杂度和空间复杂度总结（必考）
-## 6、稳定性总结（必考）
+## 5、时间复杂度、空间复杂度和稳定性总结（必考）
+
+| 排序方法 | 平均时间复杂度  | 最坏时间复杂度  | 最好时间复杂度  | 空间复杂度 | 稳定性 |
+| -------- | --------------- | --------------- | --------------- | ---------- | ------ |
+| 插入选择 | O(n^2)          | O(n^2)          | O(n)            | O(1)       | 稳定   |
+| 希尔排序 | O(n^1.3)        | O(n^2)          | O(n)            | O(1)       | 不稳定 |
+| 选择排序 | O(n^2)          | O(n^2)          | O(n^2)          | O(1)       | 不稳定 |
+| 堆排序   | O(nlogn)        | O(nlogn)        | O(nlogn)        | O(1)       | 不稳定 |
+| 冒泡排序 | O(n^2)          | O(n^2)          | O(n)            | O(1)       | 稳定   |
+| 快速排序 | O(nlogn)        | O(n^2)          | O(nlogn)        | O(nlogn)   | 不稳定 |
+| 归并排序 | O(nlogn)        | O(nlogn)        | O(nlogn)        | O(n)       | 稳定   |
+| 基数排序 | O(d * (n + rd)) | O(d * (n + rd)) | O(d * (n + rd)) | O(rd)      | 稳定   |
+
+
+
+
 
 # 九、查找★★★★★
 
 ## 1、 概念、顺序查找法和折半查找法
 ## 2、二叉排序树和二叉平衡树（必考，平衡化旋转操作）
 ## 3、B-树和B+树（理解，常考）
-## 4、散列表（必考）
+## 4、散列表（必考
