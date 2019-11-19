@@ -16,8 +16,6 @@
 1. 算法**特性**：1) 有穷性  2) 确定性  3) 输入  4) 输出  5) 可行性
 2. 算法设计**目标**：1) 正确性  2) 可读性  3) 健壮性  4) 高效率与低存储量需求
 
-
-
 # 二、线性表（最基础，常考）
 
 ## 1、概念和结构体定义
@@ -95,11 +93,13 @@
 		- 出队：**```front = (front + 1) % M```**
 		- **树的层次遍历、图的广度优先遍历**代码实现
 	- 链队列（非重点）
-		- 判断空：**```Q.front == NULL || Q.rear == NULL```**
-
+		
+- 判断空：**```Q.front == NULL || Q.rear == NULL```**
+		
 	- 双端队列（选择题，可能的输出序列）
-		输入受限：一端入，两端出
-		输出受限：两端入，一端出
+		
+		> 输入受限：一端入，两端出
+		> 输出受限：两端入，一端出
 
 
 # 四、串（每年必考）
@@ -466,7 +466,7 @@ typedef struct AdjGraph {
 - 深度优先遍历
 
   ```c
-  
+  //递归实现
   void DFS(struct AGraph *G, int *visited, int v) {
       if (visited[v])
           return;
@@ -484,6 +484,7 @@ typedef struct AdjGraph {
       DFS(G, visited, v);
   }
   
+  //非递归实现
   void DFSTraverseNR(AdjGraph *G, int v) {
       int visited[maxSize] = {0};
       InitStack(S);
@@ -657,7 +658,6 @@ void MST_Prim(struct MGraph *G, int v0, int &sum) {
   >
   > 3）所有点均访问到则拓扑排序成功
   ```C
-  
   int topSort(struct AGraph *G) {
       int stack[maxSize];
       int top = -1, n = 0;
