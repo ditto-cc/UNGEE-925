@@ -45,7 +45,7 @@
 > 
 > typedef struct DListNode {
 >        DataType data;
->     DListNode *prior, *next;
+>        DListNode *prior, *next;
 > } DListNode;				//双链表
 > 
 > ```
@@ -147,7 +147,7 @@
 5. **Tail 表尾函数**：除第一个元素外，**剩下的元素构成的表**（注：得到的是一个**表**）
 	
 > 例如： A=(a, b)  Tail(A) = ((b)); B=(a) Tail(B) = ()
-	
+
 6. **画图题**（头尾链表存储结构）
 	- 原子节点（标记域0、数据域）
 	- 广义表节点（标记域1、头指针域、尾指针域）
@@ -210,9 +210,128 @@
 5. **二叉树遍历**
 	
 	- 先序遍历：
+	
+	  ```c
+	  void preorder(struct BTNode *root) {
+	      if (!root)
+	          return;
+	      Visit(root->data);
+	      preOrder(root->lchild);
+	      preOrder(root->rchild);
+	  }
+	  
+	  //非递归先序遍历
+	  void preOrderNR(struct BTNode *root) {
+	      if (!root)
+	          return;
+	      struct BTNode S[maxSize];
+	      int top = -1;
+	      //栈和队列的实现和操作比较简单，如果栈和队列的实现不是核心算法
+	      //算法题应该可以直接接口：InitStack Push Pop StackEmpty
+	      //简化代码，避免出错
+	      S[++top] = root;
+	      struct BTNode *p;
+	      while (top > -1) {
+	          p = S[top--];
+	          //Visit是访问节点函数，按题意更改
+	          Visit(p->data);
+	          //先右后左
+	          if (p->rchild)
+	              S[++top] = p->rchild;
+	          if (p->lchild)
+	              S[++top] = p->lchild;
+	      }
+	  }
+	  ```
+	
 	- 中序遍历：
-	- 后续遍历：
+	
+	  ```c
+	  //递归中序遍历
+	  void inOrder(struct BTNode *root) {
+	      if (!root)
+	          return;
+	      inOrder(root->lchild);
+	      Visit(root->data);
+	      inOrder(root->rchild);
+	  }
+	  
+	  //非递归中序遍历
+	  void inOrderNR(struct BTNode *root) {
+	      if (!root)
+	          return;
+	      InitStack(S);
+	      struct BTNode *p = root;
+	      while (p && !StackEmpty(S)) {
+	          if (p) {
+	              Push(S, p);
+	              p = p->lchild;
+	          } else {
+	              Pop(S, p);
+	              Visit(p->data);
+	              p = p->right;
+	          }
+	      }
+	  }
+	  ```
+	
+	- 后序遍历：
+	
+	  ```c
+	  //递归后序遍历
+	  void postOrder(struct BTNode *root) {
+	      if (!root)
+	          return;
+	      postOrder(root->lchild);
+	      postOrder(root->rchild);
+	      Visit(p->data);
+	  }
+	  
+	  //非递归后序遍历
+	  //逆后序遍历序列=先序遍历过程中左右子树遍历顺序交换得到的序列
+	  void postOrderNR(struct BTNode *root) {
+	      if (!root)
+	          return;
+	      InitStack(S1);
+	      InitStack(S2);
+	      Push(S1, root);
+	      struct BTNode *p;
+	      while (!StackEmpty(S1)) {
+	          Pop(S1, p);
+	          Push(S2, p);
+	          //先左后右
+	          if (p->lchild)
+	              Push(S1, p->lchild);
+	          if (p->rchild)
+	              Push(S1, p->rchild);
+	      }
+	      while (!StackEmpty(S2)) {
+	          Pop(S2, p);
+	          Visit(p->data);
+	      }
+	  }
+	  ```
+	
 	- 层次遍历：
+	
+	  ```c
+	  void levelOrder(struct BTNode *root) {
+	      if (!root)
+	          return;
+	      InitQueue(Q);
+	      Enqueue(Q, root);
+	      struct BTNode *p;
+	      while (!QueueEmpty(Q)) {
+	          Dequeue(Q, p);
+	          Visit(p->data);
+	          if (p->lchild)
+	              Enqueue(Q, p->lchild);
+	          if (p->rchild)
+	              Enqueue(Q, p->rchild);
+	      }
+	  }
+	  ```
+	
 6. **线索二叉树**
 ```c
 typedef enum PointerTag {Link, Thread}	
@@ -258,12 +377,12 @@ typedef struct BiThrNode {
         - 路径长度：路径上的分支数目
         - 树的路径长度：根到每个节点的路径长度之和
         - 带权路径长度：节点具有权值，从该节点到根的路径长度乘节点权值
-        - 树的带权路径长度**(WPL)**：**叶子节点的带权路径长度之和**
+        - 树的带权路径长度**(WPL)**（考过计算WPL的算法题）：**叶子节点的带权路径长度之和**
 	- 赫夫曼编码：由赫夫曼树根节点到叶子节点的路径写出叶子节点的赫夫曼编码，左0右1（左1右0），不唯一
 		- 任一字符的编码串（到根的路径）都不是另一个字符的前缀（到根的路径）
 		- 产生的是**最短前缀码**
 
-	**注：赫夫曼树可以是多叉树**
+	> **注：赫夫曼树可以是多叉树**
 
 # 七、图★★★★★
 
@@ -289,18 +408,35 @@ typedef struct BiThrNode {
 9. 联通、连通图和连通分量
 	- 联通：Vi到Vj有路径
 	- 连通图：任意两个顶点都联通
-	- 连通分量：图中的极大连通子图
+	- 连通分量：图中的**极大连通子图**（添加任一个顶点之后不连通）
 
 10. 强连通图、强连通分量
 	- 强连通图：任意两个顶点互有路径
-	- 强连通分量：极大强连通子图
+	- 强连通分量：图中的**极大强连通子图**（添加任一个顶点之后不强连通）
 
 11. 权和网：带权图
 
 ## 2、图的存储结构（算法题常考）
 
 1. 邻接矩阵（顺序存储）
+
+   > 稠密图常用，存储空间**只与顶点个数相关**
+```c
+typedef struct VNode {
+    int no;
+    char info;
+}VNode;
+
+typedef struct MGraph {
+    float edges[MAXSIZE][MAXSIZE];
+    int vexnum, edgenum;
+    VNode vex[MAXSIZE];
+}
+```
+
 2. 邻接表（链式存储）
+
+   > 稀疏图常用，存储**与顶点个数和边数都有关**
 ```c
 typedef struct ArcNode {
 	int adjvex;
@@ -314,44 +450,298 @@ typedef struct VNode {
 }VNode, AdjList[MAXSIZE];
 
 typedef struct AdjGraph {
-    struct AdjList adjlist;
+    struct AdjList adjList;
     int vexnum, arcnum;
 	int kind;
 } AdjGraph;
 ```
 
-3. 邻接多重表：**无向图特有**的存储结构
-4. 十字链表：有向图特有的存储结构（相当于邻接表+逆邻接表）
+
+
+3. 邻接多重表：**无向图特有**的存储结构（相当于把无向图邻接表的边节点合成一个双向边节点）
+
+4. 十字链表：**有向图特有**的存储结构（相当于邻接表+逆邻接表）
 
 ## 3、图的遍历（必考）
 - 深度优先遍历
+
+  ```c
+  
+  void DFS(struct AGraph *G, int *visited, int v) {
+      if (visited[v])
+          return;
+  	struct VNode vex = G->adjList[v];
+      Visit(vex.data);
+      visited[v] = 1;
+      struct ArcNode *arc = vex.firstarc;
+      while (arc) {
+          DFS(G, visited, arc->adjvex);
+          arc = arc->nextarc;
+      }
+  }
+  void DFSTraverse(struct AGraph *G, int v) {
+      int visited[maxSize] = {0};
+      DFS(G, visited, v);
+  }
+  
+  void DFSTraverseNR(AdjGraph *G, int v) {
+      int visited[maxSize] = {0};
+      InitStack(S);
+      Push(S, v);
+      int p;
+      while (!StackEmpty(S)) {
+          Pop(S, &p);
+          struct VNode vex = G->adjList[p];
+          Visit(vex->data);
+          visited[p] = 1;
+          struct ArcNode *arc = vex.firstarc;
+          while (arc) {
+              if (visited[arc->arjvex] == 0)
+              	Push(S, arc->adjvex);
+              arc = arc->nextarc;
+          }
+      }
+  }
+  ```
+
 - 广度优先遍历
 
-## 4、最小生成树（常考，画表）
-- Prim(可能考算法题)
+  ```c
+  void BFSTraverse(struct AdjGraph *G, int v) {
+      int visited[maxSize] = {0};
+      InitQueue(Q);
+      EnQueue(Q, v);
+      int p;
+      while (!QueueEmpty(Q)) {
+          DeQueue(Q, &p);
+          struct VNode *vex = G->adjList[p];
+          Visit(vex->data);
+          visited[p] = 1;
+          struct ArcNode *arc = vex->firstarc;
+          while(arc) {
+              if (visited[arc->vex] == 0)
+                  EnQueue(Q, arc->adjvex);
+              arc = arc->nextarc;
+          }
+      }
+  }
+  ```
+
+## 4、最小生成树（常考）
+- **Prim**(可能考算法题)
+
+  > 时间复杂度为 **O(n^2)**，适用于**稠密图**
+  >
+  > 要会画表，从起始点开始，在候选边中找最小代价边（套路题，做几道就会了）
+
+```c
+void MST_Prim(struct MGraph *G, int v0, int &sum) {
+    int lowcost[maxSize], vset[maxSize];
+    int v = v0;
+    for (int i = 0; i < G->vexnum; i++) {
+        lowcost[i] = G->edges[v][i];
+        vset[i] = 0;
+    }
+    
+    vset[v] = 1;
+    sum = 0;
+    for (int i = 0;i < G->vexnum - 1;i++) {
+        int min = INF;
+        int k;
+        for ( int j = 0; j < G->vexnum; j++) {
+            if (vset[j] == 0 && lowcost[j] < min) {
+                min = lowcost[j];
+                k = j;
+            }
+        }
+        vset[k] = 1;
+        v = k;
+        sum += min;
+        for (int j = 0; j < G->vexnum;j++) {
+            if (G->edges[v][j] < lowcost[j] && vset[j] == 0)
+                lowcost[j] = G->edges[v][j];
+        }
+    }
+}
+```
+
 - Kruskal
 
-## 5、最短路径（常考，画表）
-- 迪杰斯特拉(常考，可能考算法题)
-- 佛洛依德算法
+  > 时间复杂度为**O(ElogE)**（和边的排序算法相关），适用于**稀疏图**
+  >
+  > 手工找最小生成树最好方法，用到**并查集**检查添加边后是否出现回路
 
-## 6、拓扑排序（常考）
+## 5、最短路径（常考）
+- **迪杰斯特拉**
+
+  > 时间复杂度**O(n^2)**，计算**单源最短路径，不能带负权边**
+
+  ```c
+  //dist[]存放顶点v到其余顶点最短的路径长度，path[]存放v到各顶点的最短路径
+  void Dijkstra(struct MGraph *G, int v, int dist[], int path[]) {
+  	int vset[maxSize];
+  	for (int i = 0; i < G->vexnum;i++) {
+  		dist[i] = G->edges[v][i];
+  		vset[i] = 0;
+  		if (G->edges[v][i] < INF)
+              path[i] = v;
+          else
+              path[i] = -1;
+  	}
+      vset[v] = 1;
+      path[v] = -1;
+      
+      for (int i = 0; i < G->vexnum;i++) {
+          int min = INF;
+          int k;
+          for (intj = 0; j < G->vexnum;j++) {
+              if (vset[j] == 0 && dist[j] < min) {
+                  k = j;
+                  min = dist[j];
+              }
+          }
+          vset[k] = 1;
+          for (int j = 0; j < G->vexnum; j++) {
+              if (vset[j] == 0 && dist[k] + G->edges[k][j] < dist[j]) {
+                  dist[j] = dist[k] + g->edges[k][j];
+                  path[j] = k;
+              }
+          }
+      }
+  }
+  ```
+
+- 弗洛依德算法
+
+  > 时间复杂度**O(n^3)**，图中**不允许有负权环**
+
+  ```c
+  void Floyd(struct MGraph *G, int path[][]) {
+  	int A[maxSize][maxSize];
+      for (int i = 0; i < G->vexnum; i++) {
+          for (int j = 0; j < g->vexnum; j++) {
+              A[i][j] = g->edges[i][j];
+              path[i][j] = -1;
+          }
+      }
+      
+      for (int k = 0; k < G->vexnum;k++) {
+          for (int i = 0; i < G->vexnum; i++) {
+              for (int j = 0; j < vexnum; j++) {
+                  if (A[i][j] > A[i][k] + A[k][j]) {
+                      A[i][j] = A[i][k] + A[k][j];
+                      path[i][j] = k;
+                  }
+              }
+          }
+      }
+  }
+  ```
+
+  
+
+## 6、拓扑排序（常考，求关键路径的第一步）
 - AOV网
+
+  > 活动在顶点上的网
+  >
+  > **有向无环图**
+  >
+  > 定点表示活动，边无权值，边代表活动先后关系
+
 - 拓扑排序
+
+  > 1）找到入度为零的起始点入栈
+  >
+  > 2）弹出入度为零的起始点，将其邻接点的入度减一，如果邻接点入度变为0则压入栈中
+  >
+  > 3）所有点均访问到则拓扑排序成功
+  ```C
+  
+  int topSort(struct AGraph *G) {
+      int stack[maxSize];
+      int top = -1, n = 0;
+      int indegree[maxSize];
+      for (int i = 0; i < G->vexnum; i++) {
+          struct ArcNode *p = G->adjList[i].firstarc;
+          while (p) {
+              indegree[i] ++;
+              p = p->nextarc;
+          }
+      }
+      
+      for (int i = 0; i < G->vexnum; i++) {
+          if (indegree[i] == 0)
+              stack[++top] = i;
+      }
+      
+      while (top > -1) {
+          int v = stack[top--];
+          n++;
+          struct VNode vex = G->adjList[v];
+          Visit(vex->data);
+          struct ArcNode *arc = vex.firstarc;
+          while (arc) {
+              if ((--indegree[arc->adjvex]) == 0)
+                  stack[++top] = arc->adjvex;
+              arc = arc->nextarc;
+          }
+      }
+      return G->vexnum == n;
+  }
+  ```
 
 ## 7、关键路径（常考，画表）
 - AOE网
-- 关键路径求法
+
+  > 活动在边上的网
+  >
+  > **有向无环图**
+  >
+  > **顶点代表事件**，**边表示活动**，边有权值 ，边代表活动持续时间
+
+- 关键路径
+
+  > **源点**：入度为0的点
+  >
+  > **汇点**：出度为0的点
+  >
+  > 关键路径：从**源点到汇点**所有路径中的**最长路径**
+  >
+  > 1) 先进行拓扑排序
+  >
+  > 2) 按拓扑排列顺序，计算顶点最早发生时间(ve(k)=**max**{ve(j) + <j, k>}，j为k的前驱顶点，可能有多个)
+  >
+  > 3) 按逆拓扑排序顺序，计算顶点最迟发生时间(vl(k)=**min**{vl(j) - <k, j>}，j为k的后继顶点，可能有多个)
+  >
+  > 4) 计算边最早发生时间e（与发出该边的顶点的最早发生时间ve相同）
+  >
+  > 5) 计算边最迟发生时间l（以该活动结束的顶点最迟发生时间vl - 边的权值）
+  >
+  > 6) 整理数据成一张表，**e和l相等的边即为关键活动**，组成的从源点到汇点的**最长路径**即为关键路径
+
 
 # 八、排序★★★★★
 
 ## 1、 排序概念和稳定性（概念，理解）
-## 2、 排序算法分类（背）
+
+- 排序：将原本无序的序列重新排列成有序的序列
+
+- **稳定性**：排序序列中有两个或两个以上相同的关键字时，排序前和排序后的相对位置不变则稳定，变化则不稳定
+
+## 2、 排序算法
 1. 插入类
+   - 直接插入排序
+   - 折半插入排序
+   - 希尔排序
 2. 交换类
+   - 冒泡排序
+   - 快速排序
 3. 选择类
-4. 归并类
-5. 基数类
+   - 简单选择排序
+   - 堆排序
+4. 二路归并排序
+5. 基数排序
 ## 4、外部排序（期末考试有，真题没见过，需要看一看）
 ## 5、时间复杂度和空间复杂度总结（必考）
 ## 6、稳定性总结（必考）
